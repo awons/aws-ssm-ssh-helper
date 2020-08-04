@@ -46,7 +46,7 @@ This solution will only work if you can use OpenSSH config directly in your IDE 
 
 ```
 Host ec2-tunnel---*
-	ProxyCommand ~/.ssh/aws-ssm-ssh-helper/host/ssh/aws-ssm-start-ssh-tunnel.sh %h ~/.ssh/id_rsa.pub
+	ProxyCommand ~/.ssh/aws-ssm-start-ssh-tunnel.sh %h ~/.ssh/id_rsa.pub
 	StrictHostKeyChecking no
 	PreferredAuthentications publickey
 	IdentityFile ~/.ssh/id_rsa

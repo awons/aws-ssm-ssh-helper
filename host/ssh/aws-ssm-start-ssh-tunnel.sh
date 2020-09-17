@@ -8,11 +8,19 @@ DB_HOST=$(echo "${1}" | awk -F '---' '{print $4}')
 DB_PORT=$(echo "${1}" | awk -F '---' '{print $5}')
 SSH_PUBLIC_KEY_PATH="${2}"
 
-CONTAINER_NAME="ec2-tunnel-$(md5sum <<< "${SEARCH_TYPE}:${SEARCH_VALUE}:${LOCAL_PORT}:${DB_HOST}:${DB_PORT}" | awk '{print $1}')"
+STRING_TO_HASH="${SEARCH_TYPE}:${SEARCH_VALUE}:${LOCAL_PORT}:${DB_HOST}:${DB_PORT}"
+case "$(uname -s)" in
+    Linux*)     CONTAINER_NAME="ec2-tunnel-$(md5sum <<< "${STRING_TO_HASH}" | awk '{print $1}')";;
+    Darwin*)    CONTAINER_NAME="ec2-tunnel-$(md5 -qs <<< "${STRING_TO_HASH}")";;
+esac
+
+if [ "$(docker ps -a --filter status=exited | grep -c "${CONTAINER_NAME}")" -eq 0 ]; then
+    docker rm -f "${CONTAINER_NAME}" || true
+fi
 
 if [ "$(docker ps | grep -c "${CONTAINER_NAME}")" -eq 0 ]; then
     LOCAL_SSH_PORT=$((32769 + RANDOM % 65536))
-    CONTAINER_ID=$(docker run \
+    docker run \
         --rm \
         --detach \
         --name="${CONTAINER_NAME}" \
@@ -22,10 +30,10 @@ if [ "$(docker ps | grep -c "${CONTAINER_NAME}")" -eq 0 ]; then
         -e "SSH_AUTH_SOCK=${SSH_AUTH_SOCK}" \
         -v ~/.aws:/root/.aws \
         -p "${LOCAL_SSH_PORT}:22" \
-        aws-ssm-ssh-helper /usr/local/bin/ssh-tunnel.sh "${SEARCH_TYPE}" "${SEARCH_VALUE}" "${LOCAL_PORT}" "${DB_HOST}" "${DB_PORT}")
+        aws-ssm-ssh-helper /usr/local/bin/ssh-tunnel.sh "${SEARCH_TYPE}" "${SEARCH_VALUE}" "${LOCAL_PORT}" "${DB_HOST}" "${DB_PORT}"
 
     COUNTER=0
-    while [ "$(docker container logs "${CONTAINER_ID}" | grep -c "TUNNEL TO EC2 ESTABLISHED")" -lt 1 ] && [ "${COUNTER}" -lt 60 ]
+    while [ "$(docker container logs "${CONTAINER_NAME}" | grep -c "TUNNEL TO EC2 ESTABLISHED")" -lt 1 ] && [ "${COUNTER}" -lt 60 ]
     do
         sleep 1
         COUNTER=$((COUNTER+1))

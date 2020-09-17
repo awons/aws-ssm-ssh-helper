@@ -13,7 +13,13 @@ cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 OUTPUT=$(python3 /tmp/tunneling-script/configure-ec2-instance.py "-${SEARCH_TYPE}" "${SEARCH_VALUE}")
 INSTANCE_ID=$(echo "${OUTPUT}" | tail -n1)
 
-ssh -4 -f -N -M -S temp-ssh.sock -L "${LOCAL_PORT}:${DB_HOST}:${DB_PORT}" "ssm-user@${INSTANCE_ID}" -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" -o ProxyCommand="aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p"
+ssh -v -4 -f -N -M \
+    -i /root/.ssh/id_rsa \
+    -S temp-ssh.sock \
+    -L "${LOCAL_PORT}:${DB_HOST}:${DB_PORT}" "ssm-user@${INSTANCE_ID}" \
+    -o "UserKnownHostsFile=/dev/null" \
+    -o "StrictHostKeyChecking=no" \
+    -o ProxyCommand="aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p"
 
 echo "TUNNEL TO EC2 ESTABLISHED"
 

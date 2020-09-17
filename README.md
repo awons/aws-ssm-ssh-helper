@@ -5,7 +5,6 @@
 * Docker
 * Make
 * Your public RSA key under `~/.ssh/id_rsa.pub`
-* Your private RSA key under `~/.ssh/id_rsa`
 * A running SSH agent
 * AWS CLI configuration under `~/.aws` with correct region to use
 

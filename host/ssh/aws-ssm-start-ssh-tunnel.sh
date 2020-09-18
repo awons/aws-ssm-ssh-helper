@@ -14,7 +14,7 @@ case "$(uname -s)" in
     Darwin*)    CONTAINER_NAME="ec2-tunnel-$(md5 -qs <<< "${STRING_TO_HASH}")";;
 esac
 
-if [ "$(docker ps -a --filter status=exited | grep -c "${CONTAINER_NAME}")" -eq 0 ]; then
+if [ "$(docker ps -a --filter status=exited | grep -c "${CONTAINER_NAME}")" -eq 1 ]; then
     docker rm -f "${CONTAINER_NAME}" || true
 fi
 

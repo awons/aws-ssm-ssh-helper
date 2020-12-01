@@ -21,7 +21,6 @@ fi
 if [ "$(docker ps | grep -c "${CONTAINER_NAME}")" -eq 0 ]; then
     LOCAL_SSH_PORT=$((32769 + RANDOM % 65536))
     docker run \
-        --rm \
         --detach \
         --name="${CONTAINER_NAME}" \
         --add-host "${DB_HOST}:127.0.0.1" \

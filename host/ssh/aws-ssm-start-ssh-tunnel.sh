@@ -11,7 +11,7 @@ SSH_PUBLIC_KEY_PATH="${2}"
 STRING_TO_HASH="${SEARCH_TYPE}:${SEARCH_VALUE}:${LOCAL_PORT}:${DB_HOST}:${DB_PORT}"
 case "$(uname -s)" in
     Linux*)     CONTAINER_NAME="ec2-tunnel-$(md5sum <<< "${STRING_TO_HASH}" | awk '{print $1}')";;
-    Darwin*)    CONTAINER_NAME="ec2-tunnel-$(md5 -qs <<< "${STRING_TO_HASH}")";;
+    Darwin*)    CONTAINER_NAME="ec2-tunnel-$(md5 "${STRING_TO_HASH}")";;
 esac
 
 if [ "$(docker ps -a --filter status=exited | grep -c "${CONTAINER_NAME}")" -eq 1 ]; then
